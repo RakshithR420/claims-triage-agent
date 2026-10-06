@@ -1,0 +1,88 @@
+### Sample requests - open in IntelliJ (HTTP Client) or VS Code (REST Client extension).
+### Change the dates if you like; lossDate must not be in the future.
+
+### 1. Small, clean claim -> FAST_TRACK
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-1001",
+  "claimantName": "Asha Menon",
+  "lossType": "COLLISION",
+  "lossDate": "2026-10-03",
+  "claimedAmount": 1200,
+  "description": "Minor fender bender in a mall parking lot, scratched rear bumper. Other driver exchanged details."
+}
+
+### 2. Suspicious theft (late report, frequent claimant, red-flag phrases) -> SPECIAL_INVESTIGATIONS
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-1006",
+  "claimantName": "Meera Krishnan",
+  "lossType": "THEFT",
+  "lossDate": "2026-08-28",
+  "claimedAmount": 22000,
+  "description": "Car was stolen from my friend's garage while I was travelling. There is no police report filed yet."
+}
+
+### 3. Injury -> SENIOR_ADJUSTER
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-1001",
+  "claimantName": "Asha Menon",
+  "lossType": "COLLISION",
+  "lossDate": "2026-10-04",
+  "claimedAmount": 3900,
+  "description": "Hit a two-wheeler at a junction. The rider was injured and taken to hospital by ambulance."
+}
+
+### 4. Lapsed policy -> DENIAL_REVIEW
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-1003",
+  "claimantName": "Daniel Joseph",
+  "lossType": "COLLISION",
+  "lossDate": "2026-10-03",
+  "claimedAmount": 2000,
+  "description": "Dent on the rear door after another car reversed into mine."
+}
+
+### Get a claim with its latest decision (ids 1-2 are seeded history, so request 3 above is claim 5)
+GET http://localhost:8080/api/claims/5
+
+### Audit trail - every tool call the agent made
+GET http://localhost:8080/api/claims/5/trace
+
+### All decisions for a claim (agent + human)
+GET http://localhost:8080/api/claims/5/decisions
+
+### Work queue: everything waiting for an adjuster
+GET http://localhost:8080/api/claims?status=PENDING_HUMAN_REVIEW
+
+### Work queue: Special Investigations
+GET http://localhost:8080/api/claims?queue=SPECIAL_INVESTIGATIONS
+
+### Adjuster review (confirm or override the agent)
+POST http://localhost:8080/api/claims/5/review
+Content-Type: application/json
+
+{
+  "queue": "SENIOR_ADJUSTER",
+  "reviewer": "adjuster.ravi",
+  "notes": "Agree - bodily injury, needs senior handling."
+}
+
+### Run the labelled eval set (18 claims) through agent + guardrails
+POST http://localhost:8080/api/eval/run
+
+### How often adjusters agreed with the agent
+GET http://localhost:8080/api/eval/review-agreement
+
+### Policies
+GET http://localhost:8080/api/policies

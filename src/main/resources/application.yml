@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: claims-triage-agent
+  datasource:
+    url: jdbc:h2:mem:claims;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:qwen2.5:7b}
+          temperature: 0.1
+
+triage:
+  llm:
+    # true  -> LLM agent (Ollama) decides, guardrails enforce hard rules, rules engine is the fallback
+    # false -> deterministic rules engine only (no model needed; used by the tests)
+    enabled: ${TRIAGE_LLM_ENABLED:true}
+    timeout-seconds: 90
+  guardrails:
+    fast-track-max-amount: 5000
+    siu-fraud-threshold: 70
+    min-confidence: 0.6
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    com.rakshith.claimstriage: INFO
